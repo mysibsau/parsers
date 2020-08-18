@@ -35,7 +35,7 @@ class Parser:
                 return int(symbol)
 
 
-    def get_one_name_subject(self, subjects):
+    def delete_repeats(self, subjects):
         '''Избавляет от дублирования наименований премдметов'''
         if subjects.count( subjects[0] ) == len(subjects):
             return [subjects[0]]
@@ -53,6 +53,17 @@ class Parser:
             subgroup = self.get_int_subgroup(sub_subject.find('li', {'class': 'num_pdgrp'}).text)
         
         return subgroup
+
+
+    def parse_type_of_subject(self, name_subject):
+        return name_subject[ name_subject.find('(') + 1 : name_subject.find(')') ]
+
+
+    def parse_cabinet(self, cabinet):
+        cabinet = cabinet.replace('корп. ', '')
+        cabinet = cabinet.replace(' каб. ', '-')
+        cabinet = re.sub(r"\"", "", cabinet)
+        return cabinet
 
 
     def get_timetable_for_group(self, id):
@@ -91,7 +102,8 @@ class Parser:
                     subjects = div_row.find_all('div')
                     
                     teachers = []
-                    name_subject = []
+                    name_subjects = []
+                    type_subjects = []
                     subgroups = []
                     location_in_university = []
                     location_in_city = []
@@ -99,14 +111,19 @@ class Parser:
                     for sub_subject in subjects:
                         
                         # Получение названия предмета
-                        name = sub_subject.find('span', {'class': 'name'}).parent.text
-                        name_subject.append( name )
+                        name = sub_subject.find('span', {'class': 'name'}).text
+                        name_subjects.append( name )
+
+                        # Получение типа предмета
+                        type_subject = self.parse_type_of_subject( sub_subject.find('span', {'class': 'name'}).parent.text )
+                        type_subjects.append( type_subject )
+
 
                         # Получение преподов
                         teachers.append( sub_subject.find('a').text )
 
                         # Местоположение
-                        location_in_university.append( sub_subject.find('a', {'href':'#'} ).text )
+                        location_in_university.append( self.parse_cabinet(sub_subject.find('a', {'href':'#'} ).text) )
                         location_in_city.append( sub_subject.find('a', {'href':'#'} )['title'] )
 
                         subgroups.append( self.get_subgroup(sub_subject) )
@@ -114,13 +131,12 @@ class Parser:
                     # Добавление данных в структуру
                     days[day].append({
                         'time': time,
-                        'name_subject': self.get_one_name_subject(name_subject),
+                        'name_subjects': self.delete_repeats(name_subjects),
+                        'type_subjects': self.delete_repeats(type_subjects),
                         'teachers': teachers,
                         'subgroups': subgroups,
-                        'location': {
-                            'in_university': location_in_university,
-                            'in_city': location_in_city
-                        }
+                        'location_in_university': self.delete_repeats(location_in_university),
+                        'location_in_city': self.delete_repeats(location_in_city)
                     })
                 
         return self.timetable
