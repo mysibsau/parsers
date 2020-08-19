@@ -68,15 +68,12 @@ class Parser:
 
     def get_timetable_for_group(self, id):
         '''Получение расписания'''
-        # Получение страницы
-        response = requests.get(
-            f'https://timetable.pallada.sibsau.ru/timetable/group/{id}'
-        )
-        html = response.text
 
+        html = requests.get(
+            f'https://timetable.pallada.sibsau.ru/timetable/group/{id}'
+        ).text
 
         soup = BeautifulSoup(html, 'html.parser')
-
 
         for numb_week in range(1, 3):
             days = self.timetable['timetable'][f'week_{numb_week}']
