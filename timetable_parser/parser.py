@@ -79,8 +79,6 @@ class Parser:
 
 
         for numb_week in range(1, 3):
-            week_timetable_html = soup.select(f'#week_{numb_week}_tab')[0]
-
             days = self.timetable['timetable'][f'week_{numb_week}']
             for day in days.keys():
 
@@ -117,7 +115,6 @@ class Parser:
                         # Получение типа предмета
                         type_subject = self.parse_type_of_subject( sub_subject.find('span', {'class': 'name'}).parent.text )
                         type_subjects.append( type_subject )
-
 
                         # Получение преподов
                         teachers.append( sub_subject.find('a').text )
