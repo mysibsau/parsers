@@ -12,4 +12,3 @@ gp.save_data_in_json()
 end = time.time()
 
 print(f'Time: {end-begin}')
-
