@@ -5,12 +5,12 @@ import json
 
 groups = {}
 
-
 def is_group(soup):
     element = soup.find('h3', {'class': 'text-center'})
     if element is not None:
         return element.text
     return False
+
 
 def parse_name_group(string):
     string = re.sub(r"\s", "", string)
@@ -41,3 +41,5 @@ def save_data_in_json(data):
     f = open('name_groups.json', 'w', encoding="utf-8")
     json.dump(data, f, ensure_ascii=False, indent=4)
 
+
+save_data_in_json(get_name_groups_by_id())
