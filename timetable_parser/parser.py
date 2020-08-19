@@ -27,110 +27,105 @@ class Parser:
             'session': {}
         }
 
-
     def get_int_subgroup(self, string):
-        '''Из строки возвращает целочисленный номер группы''' 
         for symbol in string:
             if symbol.isdigit():
                 return int(symbol)
 
-
     def delete_repeats(self, subjects):
-        '''Избавляет от дублирования наименований премдметов'''
         if subjects.count( subjects[0] ) == len(subjects):
             return [subjects[0]]
         return subjects
 
-
-    def get_subgroup(self, sub_subject):
-        '''Получение подгруппы'''
-        subgroup = None
-
-        if sub_subject.find('i', {'class': 'fa-paperclip'}) is not None:
-            subgroup = self.get_int_subgroup(sub_subject.find_all('li')[-1].text)
-        
-        if sub_subject.find('li', {'class': 'num_pdgrp'}) is not None:
-            subgroup = self.get_int_subgroup(sub_subject.find('li', {'class': 'num_pdgrp'}).text)
-        
-        return subgroup
-
-
     def parse_type_of_subject(self, name_subject):
         return name_subject[ name_subject.find('(') + 1 : name_subject.find(')') ]
-
 
     def parse_cabinet(self, cabinet):
         cabinet = cabinet.replace('корп. ', '')
         cabinet = cabinet.replace(' каб. ', '-')
-        cabinet = cabinet.replace("\"", "")
+        cabinet = cabinet.replace('"', '')
         return cabinet
 
+    def get_time(self, line):
+        return re.sub(r"\s", "", line.find('div', {'class': 'hidden-xs'}).text)
 
-    def get_timetable_for_group(self, id):
-        '''Получение расписания'''
+    def get_subjects(self, line):
+        div_row = line.find('div', {'class': 'row'})
+        return div_row.find_all('div')
 
-        html = requests.get(
+    def get_name_subjects(self, line):
+        result = []
+        for sub_subject in self.get_subjects(line):
+            name = sub_subject.find('span', {'class': 'name'}).text
+            result.append(name)
+        return self.delete_repeats(result)
+
+    def get_type_subjects(self, line):
+        result = []
+        for sub_subject in self.get_subjects(line):
+            type_subject = self.parse_type_of_subject(sub_subject.find('span', {'class': 'name'}).parent.text )
+            result.append(type_subject)
+        return self.delete_repeats(result)
+
+    def get_teachers(self, line):
+        result = []
+        for sub_subject in self.get_subjects(line):
+            result.append(sub_subject.find('a').text)
+        return result
+
+    def get_location_in_university(self, line):
+        result = []
+        for sub_subject in self.get_subjects(line):
+            result.append(self.parse_cabinet(sub_subject.find('a', {'href': '#'}).text))
+        return self.delete_repeats(result)
+
+    def get_location_in_city(self, line):
+        result = []
+        for sub_subject in self.get_subjects(line):
+            result.append(sub_subject.find('a', {'href': '#'})['title'])
+        return self.delete_repeats(result)
+
+    def get_subgroups(self, line):
+        result = []
+        for sub_subject in self.get_subjects(line):
+            subgroup = None
+            if sub_subject.find('i', {'class': 'fa-paperclip'}) is not None:
+                subgroup = self.get_int_subgroup(sub_subject.find_all('li')[-1].text)
+            
+            if sub_subject.find('li', {'class': 'num_pdgrp'}) is not None:
+                subgroup = self.get_int_subgroup(sub_subject.find('li', {'class': 'num_pdgrp'}).text)
+            
+            result.append(subgroup)
+        return result
+
+    def get_day_timetable(self, numb_week, day, id):
+        response = requests.get(
             f'https://timetable.pallada.sibsau.ru/timetable/group/{id}'
         ).text
+        soup = BeautifulSoup(response, 'html.parser')
+        return soup.select(f'#week_{numb_week}_tab > div.day.{day} > div.body')
 
-        soup = BeautifulSoup(html, 'html.parser')
+    def is_weekend(self, day_timetable):
+        return len(day_timetable) == 0
 
+    def get_timetable_for_group(self, id):
         for numb_week in range(1, 3):
             days = self.timetable['timetable'][f'week_{numb_week}']
-            for day in days.keys():
-
-                # Проверка на выходной день
-                try:
-                    day_timetable_html = soup.select(f'#week_{numb_week}_tab > div.day.{day} > div.body')[0]
-                except IndexError:
+            for day in days:
+                day_timetable = self.get_day_timetable(numb_week, day, id)
+                if self.is_weekend(day_timetable):
                     days[day].append({'weekend': 'Отдыхайте'})
                     continue
 
-                div_line = day_timetable_html.find_all('div', {'class': 'line'})
-
-                for line in div_line:
-                    # Парсинг времени
-                    time = re.sub(r"\s", "", line.find('div', {'class': 'hidden-xs'}).text)
-
-                    # Получение предметов, которые стоят в одно время
-                    div_row = line.find('div', {'class': 'row'})
-                    subjects = div_row.find_all('div')
-                    
-                    teachers = []
-                    name_subjects = []
-                    type_subjects = []
-                    subgroups = []
-                    location_in_university = []
-                    location_in_city = []
-
-                    for sub_subject in subjects:
-                        
-                        # Получение названия предмета
-                        name = sub_subject.find('span', {'class': 'name'}).text
-                        name_subjects.append( name )
-
-                        # Получение типа предмета
-                        type_subject = self.parse_type_of_subject( sub_subject.find('span', {'class': 'name'}).parent.text )
-                        type_subjects.append( type_subject )
-
-                        # Получение преподов
-                        teachers.append( sub_subject.find('a').text )
-
-                        # Местоположение
-                        location_in_university.append( self.parse_cabinet(sub_subject.find('a', {'href':'#'} ).text) )
-                        location_in_city.append( sub_subject.find('a', {'href':'#'} )['title'] )
-
-                        subgroups.append( self.get_subgroup(sub_subject) )
-                    
-                    # Добавление данных в структуру
+                for line in day_timetable[0].find_all('div', {'class': 'line'}):
                     days[day].append({
-                        'time': time,
-                        'name_subjects': self.delete_repeats(name_subjects),
-                        'type_subjects': self.delete_repeats(type_subjects),
-                        'teachers': teachers,
-                        'subgroups': subgroups,
-                        'location_in_university': self.delete_repeats(location_in_university),
-                        'location_in_city': self.delete_repeats(location_in_city)
+                        'time': self.get_time(line),
+                        'name_subjects': self.get_name_subjects(line),
+                        'type_subjects': self.get_type_subjects(line),
+                        'teachers': self.get_teachers(line),
+                        'subgroups': self.get_subgroups(line),
+                        'location_in_university': self.get_location_in_university(line),
+                        'location_in_city': self.get_location_in_city(line)
                     })
                 
         return self.timetable
