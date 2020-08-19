@@ -62,7 +62,7 @@ class Parser:
     def parse_cabinet(self, cabinet):
         cabinet = cabinet.replace('корп. ', '')
         cabinet = cabinet.replace(' каб. ', '-')
-        cabinet = re.sub(r"\"", "", cabinet)
+        cabinet = cabinet.replace("\"", "")
         return cabinet
 
 
