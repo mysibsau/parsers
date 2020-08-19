@@ -20,7 +20,7 @@ def parse_name_group(string):
 
 
 def get_name_groups_by_id():
-    for id_group in range(5047, 5090):
+    for id_group in range(0, 6000):
         # Получение страницы
         response = requests.get(
             f'https://timetable.pallada.sibsau.ru/timetable/group/{id_group}'
