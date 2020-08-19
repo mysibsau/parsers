@@ -22,11 +22,10 @@ def parse_name_group(string):
 def get_name_groups_by_id():
     for id_group in range(0, 6000):
         # Получение страницы
-        response = requests.get(
+        html = requests.get(
             f'https://timetable.pallada.sibsau.ru/timetable/group/{id_group}'
-        )
+        ).text
 
-        html = response.text
         soup = BeautifulSoup(html, 'html.parser')
         group = is_group(soup)
 
