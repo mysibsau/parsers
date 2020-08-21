@@ -50,4 +50,4 @@ class GroupParser:
     def save_data_in_json(self):
         with open('name_groups.csv', 'w', encoding="utf-8") as f:
             for i in self.groups:
-                f.write(f'{i[0]};{i[1]}')
+                f.write(f'{i[0]};{i[1]}\n')
