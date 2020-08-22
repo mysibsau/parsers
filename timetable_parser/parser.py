@@ -6,25 +6,22 @@ import re
 class Parser:
     def __init__(self):
         self.timetable = {
-            'timetable': {
-                'week_1': {
-                    'monday': [],
-                    'tuesday': [],
-                    'wednesday': [],
-                    'thursday': [],
-                    'friday': [],
-                    'saturday': [],
-                },
-                'week_2': {
-                    'monday': [],
-                    'tuesday': [],
-                    'wednesday': [],
-                    'thursday': [],
-                    'friday': [],
-                    'saturday': [],
-                }
+            'week_1': {
+                'monday': [],
+                'tuesday': [],
+                'wednesday': [],
+                'thursday': [],
+                'friday': [],
+                'saturday': [],
             },
-            'session': {}
+            'week_2': {
+                'monday': [],
+                'tuesday': [],
+                'wednesday': [],
+                'thursday': [],
+                'friday': [],
+                'saturday': [],
+            }
         }
 
     def get_int_subgroup(self, string):
@@ -108,9 +105,9 @@ class Parser:
     def is_weekend(self, day_timetable):
         return len(day_timetable) == 0
 
-    def get_timetable_for_group(self, id):
+    def get_timetable(self, id):
         for numb_week in range(1, 3):
-            days = self.timetable['timetable'][f'week_{numb_week}']
+            days = self.timetable[f'week_{numb_week}']
             for day in days:
                 day_timetable = self.get_day_timetable(numb_week, day, id)
                 if self.is_weekend(day_timetable):
@@ -127,5 +124,5 @@ class Parser:
                         'location_in_university': self.get_location_in_university(line),
                         'location_in_city': self.get_location_in_city(line)
                     })
-                
+
         return self.timetable
