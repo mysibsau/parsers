@@ -3,8 +3,8 @@ from parser import Parser
 
 def main():
 
-    time_table = Parser().get_timetable(5047)
-    print(time_table)
+    time_table = Parser().get_timetable(720)
+    # print(time_table)
 
     for week in time_table:
         for day in time_table[week]:
