@@ -35,6 +35,9 @@ class Parser:
         return subjects
 
     def parse_type_of_subject(self, name_subject):
+        type_subject = name_subject[ name_subject.find('(') + 1 : name_subject.find(')') ]
+        if type_subject not in ['Лекция', 'Практика', 'Лабораторная работа']:
+            name_subject = name_subject.replace(f'({type_subject})', '')
         return name_subject[ name_subject.find('(') + 1 : name_subject.find(')') ]
 
     def parse_cabinet(self, cabinet):
