@@ -58,14 +58,14 @@ class Parser:
         for sub_subject in self.get_subjects(line):
             name = sub_subject.find('span', {'class': 'name'}).text
             result.append(name)
-        return self.delete_repeats(result)
+        return result
 
     def get_type_subjects(self, line):
         result = []
         for sub_subject in self.get_subjects(line):
             type_subject = self.parse_type_of_subject(sub_subject.find('span', {'class': 'name'}).parent.text )
             result.append(type_subject)
-        return self.delete_repeats(result)
+        return result
 
     def get_teachers(self, line):
         result = []
@@ -77,13 +77,13 @@ class Parser:
         result = []
         for sub_subject in self.get_subjects(line):
             result.append(self.parse_cabinet(sub_subject.find('a', {'href': '#'}).text))
-        return self.delete_repeats(result)
+        return result
 
     def get_location_in_city(self, line):
         result = []
         for sub_subject in self.get_subjects(line):
             result.append(sub_subject.find('a', {'href': '#'})['title'])
-        return self.delete_repeats(result)
+        return result
 
     def get_subgroups(self, line):
         result = []
