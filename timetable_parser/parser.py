@@ -29,11 +29,6 @@ class Parser:
             if symbol.isdigit():
                 return int(symbol)
 
-    def delete_repeats(self, subjects):
-        if subjects.count( subjects[0] ) == len(subjects):
-            return [subjects[0]]
-        return subjects
-
     def parse_type_of_subject(self, name_subject):
         type_subject = name_subject[ name_subject.find('(') + 1 : name_subject.find(')') ]
         if type_subject not in ['Лекция', 'Практика', 'Лабораторная работа']:
