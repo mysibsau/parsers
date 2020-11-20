@@ -3,13 +3,15 @@ from parser import Parser
 
 def main():
 
-    session = Parser().get_session(5080)
+    session = Parser().get_session(5047)
 
-    for day in session:
-        for key, value in day.items():
-            print(key, ':', value)
-        print()
-        print()
+    if session:
+
+        for day in session:
+            for key, value in day.items():
+                print(key, ':', value)
+            print()
+            print()
 
 
 
