@@ -45,7 +45,7 @@ class ParseConsultation:
 
     def get_consult_day(self, day):
         name_day = day.find('div', {'class': 'name'}).find('div').text
-        return re.sub(r"\s", "", name_day)
+        return re.sub(r"\s", "", name_day.replace('сегодня', ''))
 
 
     def get_consult_time(self, day):
