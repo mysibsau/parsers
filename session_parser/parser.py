@@ -9,7 +9,12 @@ class Parser:
 
 
     def get_session(self, group_id):
-        for ind, day in enumerate(self.get_exam_days(group_id)):
+        days = self.get_exam_days(group_id)
+
+        if not self.is_session(days):
+            return None
+
+        for ind, day in enumerate(days):
             self.session.append({
                 'date': self.get_exam_date(day, ind + 2),
                 'time': self.get_exam_time(day, ind + 2),
@@ -27,7 +32,7 @@ class Parser:
             f'https://timetable.pallada.sibsau.ru/timetable/group/{id}'
         ).text
         soup = BeautifulSoup(response, 'html.parser')
-        return self.check_session(soup.select('#session_tab > div'))
+        return soup.select('#session_tab > div')
 
 
     def get_exam_date(self, day, child_num):
@@ -76,9 +81,8 @@ class Parser:
         return name_discipline[ name_discipline.find('(') + 1 : name_discipline.find(')') ]
 
 
-    def check_session(self, soup):
+    def is_session(self, soup):
         if soup[0].findChildren('h3'):
-           self.session = None
-           exit()
+           return None
         return soup
 
