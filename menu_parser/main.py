@@ -37,15 +37,22 @@ def get_type_name(tr):
     return tr.find('th').text.strip()
 
 
+def menu_is_empty(soup):
+    return len(soup.find_all('a', {'data-toggle': 'pill'})) == 0
+
+
 def get_all_menu(html_file):
     soup = BeautifulSoup(open(html_file), 'html.parser')
+
+    if menu_is_empty(soup):
+        yield {'error': 'menu is empty'}
+
     for menu_num in range(get_menu_quantities(soup)):
         type_dish = None
         for tr in get_tr_in_table(get_sub_menu(soup, menu_num)):
 
             if tr.attrs.get('class') == ['active']:
                 type_dish = get_type_name(tr)
-
             else:
                 yield {
                     'type': type_dish,
@@ -57,7 +64,7 @@ def get_all_menu(html_file):
 
 
 if __name__ == '__main__':
-    for dish in get_all_menu('menu_all.html'):
+    for dish in get_all_menu('menu_all_1.html'):
         for key, value in dish.items():
             print(key, ":", value)
         print()
