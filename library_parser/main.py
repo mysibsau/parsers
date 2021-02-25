@@ -42,19 +42,49 @@ def get_author_name(soup, num):
         return None
 
 
-def get_all_books(html_file):
+def get_place(soup, num):
+    tickets = {
+        'УА': 'Л 208',
+        'СЭА': 'Л 203',
+        'НА': 'Л 204',
+        'ХА': 'Л 208',
+        'ХР': 'Л 208'
+    }
+    place = soup.find_all('input', {'name': "MFN"})[num].parent.parent.text\
+            .split('Имеются экземпляры в отделах: ')[-1]\
+            .split(')')[0]\
+            .split('(')[0]
 
+    return tickets.get(place, None)
+
+
+def get_count(soup, num):
+    try:
+        count = int(
+            soup.find_all('input', {'name': "MFN"})[num].parent.parent.text\
+                .split('Имеются экземпляры в отделах: ')[-1]\
+                .split(')')[0]\
+                .split('(')[-1]
+        )
+    except ValueError:
+        return 0
+    return count
+
+
+def get_all_books(html_file):
     soup = BeautifulSoup(open(html_file, encoding='cp1251'), 'html.parser')
     for num in range(get_book_quantities(soup)):
         yield {
             'author': get_author_name(soup, num),
             'name': get_name_book(soup, num),
-            'url': get_link(soup, num)
+            'url': get_link(soup, num),
+            'place': get_place(soup, num),
+            'count': get_count(soup, num)
         }
 
 
 if __name__ == '__main__':
-    for book in get_all_books('IBIS.html'):
+    for book in get_all_books('IZDV.html'):
         for key, value in book.items():
             print(key, ":", value)
         print()
