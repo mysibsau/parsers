@@ -27,22 +27,22 @@ def get_name_book(soup, num):
 
 
 def get_link(soup, num):
-    if (link := soup.select(
+    if link := soup.select(
         f'#irbis > tbody > tr > td > table:nth-child(8) > tbody > tr:nth-child({num}) > td:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(1) > b > a'
-    )) != []:
+    ):
         return link[0]['href']
     else:
         return None
 
 
 def get_author_name(soup, num):
-    if (name := soup.select(
+    if name := soup.select(
         f'#irbis > tbody > tr > td > table:nth-child(8) > tbody > tr:nth-child({num}) > td:nth-child(3) > table > tbody > tr:nth-child(1) > td > a'
-    )) != []:
+    ):
         return name[0].text
     elif (name := soup.select(
         f'#irbis > tbody > tr > td > table:nth-child(8) > tbody > tr:nth-child({num}) > td:nth-child(3) > table > tbody > tr:nth-child(1) > td > b:nth-child(5)'
-    )) != [] and name[0].text != '':
+    )) and name[0].text:
         return name[0].text
     else:
         return None
