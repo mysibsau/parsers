@@ -45,9 +45,7 @@ def get_author_name(soup, num):
     )) != [] and name[0].text != '':
         return name[0].text
     else:
-        '''********************ПОЧИНИТЬ РЕГУЛЯРКУ**************************'''
-        sample = r"\w\. \w\. \w+"
-        return re.findall(sample, get_text(soup, num))[0]
+        return None
 
 
 def get_all_books(html_file):
