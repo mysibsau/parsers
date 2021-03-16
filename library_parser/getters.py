@@ -9,7 +9,7 @@ def get_random_req_id_client():
     return randint(1, 900000)
 
 
-def get_books_from_library(key_words='Программирование': str, physical: bool = True) -> str:
+def get_books_from_library(key_words: str = 'программирование', physical: bool = True) -> str:
     if not physical:
         response = requests.get(
             f'http://biblioteka.sibsau.ru/jirbis2/components/com_irbis/ajax_provider.php?task=set_selected_bases&bl_id_array_selected%5B1%5D=3&bl_id_array_selected%5B11%5D=11&_=1615539096378'
