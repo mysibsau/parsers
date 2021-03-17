@@ -23,10 +23,10 @@ def get_books_from_library(key_words: str = 'программирование', 
             'fasets': '',
             'req_static': 1,
             'keywords': key_words,
-            "task": 'search_broadcast',
-            "first_number": 1,
-            "req_id_client": req_id_client,
-            "selected_search_flag": 0,
+            'task': 'search_broadcast',
+            'first_number': 1,
+            'req_id_client': req_id_client,
+            'selected_search_flag': 0,
         },
     )
 
@@ -43,7 +43,6 @@ def get_book_holders(url_part: str) -> str:
     ).text
 
 
-
 '''def get_books(key_word: str, physical: bool = True) -> list:
     html = get_books_from_library(key_word, physical)
     if physical:
@@ -53,5 +52,5 @@ def get_book_holders(url_part: str) -> str:
 
 
 if __name__ == '__main__':
-    print(get_books_from_library(key_words='Программирование', physical=False))
+    print(get_books_from_library(key_words='Программирование', physical=True))
     # print(get_books_from_library('Программирование', False))
