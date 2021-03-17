@@ -1,6 +1,7 @@
 from lxml import html
 from io import StringIO
 from getters import get_books_from_library, get_book_holders
+import re
 
 
 def get_book_quantities(root: html.HtmlElement) -> int:
@@ -12,10 +13,13 @@ def get_author_name(root: html.HtmlElement, num: int) -> str:
         return author
 
 
+def get_text(root: html.HtmlElement, num: int) -> str:
+    return ' '.join([item.strip() for item in root.cssselect("div.bo_div")[num].xpath('./text()')]).strip()
+
+
 def get_name_book(root: html.HtmlElement, num: int) -> str:
     # root.cssselect("div.bo_div")[num].xpath('./span[2]')[0].text
-    text = ' '.join([item.strip() for item in root.cssselect("div.bo_div")[num].xpath('./text()')]).strip()
-    return text\
+    return get_text(root, num)\
         .split('>> ')[-1]\
         .split('\xa0\xa0\xa0\xa0')[-1]\
         .split(':')[0]\
@@ -34,7 +38,9 @@ def get_place_and_count(root: html.HtmlElement, num: int) -> tuple:
 
 def get_link(root: html.HtmlElement, num: int) -> str:
     '''Получение ссылки на полный текст'''
-    pass
+    text = get_text(root, num).strip()
+    if protocol := re.findall(r"(http|https):", text)[0]:
+        return protocol + text.split(protocol)[-1].split('(дата обращения')[0].strip()
 
 
 def get_physical_books(content: str) -> list:
@@ -81,8 +87,9 @@ def get_digital_books(content: str) -> list:
 
 
 if __name__ == '__main__':
-    content = get_books_from_library(key_words='Программирование', physical=True)
-    for book in get_physical_books(content):
+    content = get_books_from_library(key_words='программирование', physical=False)
+    # content = open('test2.html').read()
+    for book in get_digital_books(content):
         for key, value in book.items():
             print(key, ':', value)
         print()
