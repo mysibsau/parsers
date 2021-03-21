@@ -43,8 +43,8 @@ def get_place_and_count(root: html.HtmlElement, num: int) -> tuple:
 def get_link(root: html.HtmlElement, num: int) -> str:
     '''Получение ссылки на полный текст'''
     text = get_text(root, num).strip()
-    if protocol := re.findall(r"(http|https):", text)[0]:
-        return protocol + text.split(protocol)[-1].split('(дата обращения')[0].strip()
+    if protocol := re.findall(r"(http|https):", text):
+        return protocol[0] + text.split(protocol[0])[-1].split('(дата обращения')[0].strip()
 
 
 def get_physical_books(content: str) -> list:
