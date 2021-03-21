@@ -2,6 +2,9 @@ from lxml import html
 from io import StringIO
 from getters import get_books_from_library, get_book_holders
 import re
+import time
+from functools import partial
+from multiprocessing.dummy import Pool as ThreadPool
 
 
 def get_book_quantities(root: html.HtmlElement) -> int:
@@ -18,7 +21,6 @@ def get_text(root: html.HtmlElement, num: int) -> str:
 
 
 def get_name_book(root: html.HtmlElement, num: int) -> str:
-    # root.cssselect("div.bo_div")[num].xpath('./span[2]')[0].text
     return get_text(root, num)\
         .split('>> ')[-1]\
         .split('\xa0\xa0\xa0\xa0')[-1]\
@@ -30,6 +32,8 @@ def get_place_and_count(root: html.HtmlElement, num: int) -> tuple:
     '''Получение места хранения книги и их количество'''
     url_part = root.cssselect("div.bo_tabs")[num].xpath('./ul/li[2]/a')[0].get('href')
     content = get_book_holders(url_part)
+    if not content:
+        return None, None
     table = html.parse(StringIO(content)).getroot()
     place = table.cssselect("td.ex_full_name_cell")[0].text.strip()
     count = table.cssselect("td.ex_number_cell")[0].text.strip()
@@ -47,10 +51,15 @@ def get_physical_books(content: str) -> list:
     root = html.parse(StringIO(content)).getroot()
     result = []
 
-    for num in range(get_book_quantities(root)):
+    pool = ThreadPool()
+
+    books_count = range(get_book_quantities(root))
+    books_storage = pool.map(partial(get_place_and_count, root), books_count)
+
+    for num in books_count:
         author = get_author_name(root, num)
         name = get_name_book(root, num)
-        place, count = get_place_and_count(root, num)
+        place, count = books_storage[num]
 
         if not all((author, name, place, count)):
             continue
@@ -87,9 +96,12 @@ def get_digital_books(content: str) -> list:
 
 
 if __name__ == '__main__':
-    content = get_books_from_library(key_words='программирование', physical=False)
-    # content = open('test2.html').read()
-    for book in get_digital_books(content):
+    start_time = time.time()
+    content = get_books_from_library(key_words='программирование', physical=True)
+    
+    for book in get_physical_books(content):
         for key, value in book.items():
             print(key, ':', value)
         print()
+    end_time = time.time()
+    print(f'TIME: {end_time-start_time}')
