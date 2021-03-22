@@ -8,7 +8,11 @@ from multiprocessing.dummy import Pool as ThreadPool
 
 
 def get_book_quantities(root: html.HtmlElement) -> int:
-    return len(root.cssselect('table.record'))
+    try:
+        count = len(root.cssselect('table.record'))
+    except AttributeError:
+        return 0
+    return count
 
 
 def get_author_name(root: html.HtmlElement, num: int) -> str:
@@ -35,8 +39,11 @@ def get_place_and_count(root: html.HtmlElement, num: int) -> tuple:
     if not content:
         return None, None
     table = html.parse(StringIO(content)).getroot()
-    place = table.cssselect("td.ex_full_name_cell")[0].text.strip()
-    count = table.cssselect("td.ex_number_cell")[0].text.strip()
+    try:
+        place = table.cssselect("td.ex_full_name_cell")[0].text.strip()
+        count = table.cssselect("td.ex_number_cell")[0].text.strip()
+    except IndexError:
+        return None, None
     return place.split('(')[-1][:-1].split(':')[0], int(count.strip())
 
 
@@ -97,8 +104,8 @@ def get_digital_books(content: str) -> list:
 
 if __name__ == '__main__':
     start_time = time.time()
-    content = get_books_from_library(key_words='программирование', physical=True)
-    
+    content = get_books_from_library(key_words='Ефремов', physical=True)
+
     for book in get_physical_books(content):
         for key, value in book.items():
             print(key, ':', value)
