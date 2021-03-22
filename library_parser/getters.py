@@ -12,7 +12,7 @@ def get_random_req_id_client() -> int:
 def get_books_from_library(key_words: str = 'программирование', physical: bool = True) -> str:
     if not physical:
         requests.get(
-            f'{BASE_URL}/jirbis2/components/com_irbis/ajax_provider.php?task=set_selected_bases&bl_id_array_selected%5B1%5D=3&bl_id_array_selected%5B11%5D=11&_=1615539096378'
+            f'{BASE_URL}/jirbis2/components/com_irbis/ajax_provider.php?task=set_selected_bases&bl_id_array_selected%5B1%5D=3&bl_id_array_selected%5B11%5D=11'
         )
 
     req_id_client = get_random_req_id_client()
@@ -31,11 +31,15 @@ def get_books_from_library(key_words: str = 'программирование', 
     )
 
     response = requests.get(
-        f'{BASE_URL}/jirbis2/components/com_irbis/ajax_provider.php?task=show_results&req_id_client={req_id_client}&first_number=1&recs_outputed=0&reqs_outputed=0&last_output_time=0&finish_flag=last&_=1615539096361'
+        f'{BASE_URL}/jirbis2/components/com_irbis/ajax_provider.php?task=show_results&req_id_client={req_id_client}&first_number=1&recs_outputed=0&reqs_outputed=0&last_output_time=0&finish_flag=last'
     )
 
     if response.status_code == 200:
-        return response.json()['recs']
+        return delete_bo_lighting_tag(response.json()['recs'])
+
+
+def delete_bo_lighting_tag(html: str) -> str:
+    return html.replace("<span class=\"bo_lighting\">", '')
 
 
 def get_book_holders(url_part: str) -> str:
