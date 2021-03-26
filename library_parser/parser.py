@@ -4,7 +4,6 @@ from getters import get_books_from_library, get_book_holders
 import re
 import time
 from functools import partial
-from multiprocessing.dummy import Pool as ThreadPool
 
 
 def get_book_quantities(root: html.HtmlElement) -> int:
@@ -58,15 +57,10 @@ def get_physical_books(content: str) -> list:
     root = html.parse(StringIO(content)).getroot()
     result = []
 
-    pool = ThreadPool()
-
-    books_count = range(get_book_quantities(root))
-    books_storage = pool.map(partial(get_place_and_count, root), books_count)
-
-    for num in books_count:
+    for num in range(get_book_quantities(root)):
         author = get_author_name(root, num)
         name = get_name_book(root, num)
-        place, count = books_storage[num]
+        place, count = get_place_and_count(root, num)
 
         if not all((author, name, place, count)):
             continue
@@ -104,9 +98,8 @@ def get_digital_books(content: str) -> list:
 
 if __name__ == '__main__':
     start_time = time.time()
-    content = get_books_from_library(key_words='Ефремов', physical=True)
-
-    for book in get_physical_books(content):
+    content = get_books_from_library(key_words='Программирование', physical=False)
+    for book in get_digital_books(content):
         for key, value in book.items():
             print(key, ':', value)
         print()
